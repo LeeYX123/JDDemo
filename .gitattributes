@@ -1,0 +1,7 @@
+# 统一换行：文本按 LF 存储，Windows 批处理保持原始字节（GBK + CRLF）
+* text=auto
+*.bat -text
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

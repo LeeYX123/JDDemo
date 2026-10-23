@@ -1,0 +1,55 @@
+/* 搜索列表页 */
+/* ---------------- 搜索页 ---------------- */
+.search-page { padding-bottom: 30px; }
+.filter-panel { background: #fff; border-radius: 4px; padding: 4px 20px 12px; }
+.filter-row { display: flex; align-items: flex-start; padding: 8px 0; border-bottom: 1px dashed #f2f2f2; }
+.filter-row:last-child { border-bottom: 0; }
+.filter-label { width: 64px; flex: none; color: #999; line-height: 24px; }
+.filter-values { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; flex: 1; }
+.filter-values button { height: 24px; padding: 0 10px; color: #666; border-radius: 2px; font-size: 12px; }
+.filter-values button:hover { color: var(--red); }
+.filter-values button.on { background: var(--red); color: #fff; }
+.filter-empty { color: #bbb; font-size: 12px; line-height: 24px; }
+.price-filter { align-items: center; }
+.price-inputs { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; color: #ccc; }
+.price-inputs input {
+  width: 72px; height: 24px; padding: 0 8px; border: 1px solid #e6e6e6; outline: 0; font-size: 12px;
+}
+.price-inputs input:focus { border-color: var(--red); }
+.filter-selected { display: flex; align-items: flex-start; padding-top: 10px; border-top: 1px solid #f5f5f5; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px;
+  border: 1px solid var(--red); color: var(--red); font-size: 12px; background: #fff;
+}
+.chip i { font-style: normal; cursor: pointer; color: #c04b43; }
+.chip i:hover { color: var(--red-dark); font-weight: 700; }
+.clear-all { color: #999; font-size: 12px; margin-left: 6px; }
+.clear-all:hover { color: var(--red); }
+
+.sort-bar {
+  display: flex; align-items: center; height: 44px; margin-top: 10px; padding: 0 16px;
+  background: #fff; border-bottom: 3px solid #f0f0f0;
+}
+.sort-items { display: flex; align-items: center; gap: 2px; }
+.sort-item { height: 44px; padding: 0 14px; font-size: 12px; color: #666; border-bottom: 3px solid transparent; margin-bottom: -3px; }
+.sort-item:hover { color: var(--red); }
+.sort-item.on { color: var(--red); border-color: var(--red); font-weight: 700; }
+.sort-arrows { display: inline-flex; flex-direction: column; line-height: 6px; margin-left: 3px; font-size: 8px; color: #ccc; }
+.sort-arrows i { font-style: normal; }
+.sort-arrows i.on { color: var(--red); }
+.stock-check { margin-left: 16px; display: flex; align-items: center; gap: 5px; color: #666; font-size: 12px; }
+.stock-check input { accent-color: var(--red); }
+.sort-meta { margin-left: auto; display: flex; align-items: center; gap: 14px; color: #999; font-size: 12px; }
+.sort-meta b { color: var(--red); font-size: 14px; }
+.page-jump { display: inline-flex; align-items: center; gap: 6px; }
+.page-jump button {
+  width: 22px; height: 22px; border: 1px solid #e6e6e6; background: #fff; color: #999; line-height: 1;
+}
+.page-jump button:hover { border-color: var(--red); color: var(--red); }
+.page-jump button:disabled { color: #ddd; cursor: not-allowed; }
+
+.search-result-panel { background: #fff; border-radius: 0 0 4px 4px; padding: 16px; min-height: 420px; }
+.search-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.search-grid .product-card { width: auto; }
+

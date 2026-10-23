@@ -1,0 +1,22 @@
+# 依赖与产物
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.pyc
+*.log
+
+# 本地环境与数据库
+backend/.env
+backend/db.sqlite3
+backend/.venv/
+
+# 运行期产物
+scripts/logs/
+.shots/
+.workbuddy/
+
+# 编辑器
+.vscode/
+.idea/
+.DS_Store

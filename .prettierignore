@@ -1,0 +1,15 @@
+node_modules
+dist
+.shots
+scripts/logs
+backend/.venv
+backend/db.sqlite3
+backend/.env
+*.log
+__pycache__
+*.pyc
+.DS_Store
+
+# 样式文件保持紧凑的分节写法，避免格式化后单文件超过 400 行
+web/src/styles/**
+admin/src/styles/**

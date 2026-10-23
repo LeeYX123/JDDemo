@@ -1,0 +1,24 @@
+{
+  "name": "jd-demo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "京东版式还原演示：Vue 3 买家端 + Vue 3/Element Plus 运营后台 + Django REST Framework",
+  "scripts": {
+    "dev:web": "npm --prefix web run dev",
+    "dev:admin": "npm --prefix admin run dev",
+    "build": "npm --prefix web run build && npm --prefix admin run build",
+    "lint": "eslint \"web/src/**/*.{js,vue}\" \"admin/src/**/*.{js,vue}\"",
+    "format": "prettier --write \"web/src/**/*.{js,vue,css}\" \"admin/src/**/*.{js,vue,css}\" \"*.md\" \"docs/*.md\"",
+    "smoke": "backend/.venv/Scripts/python.exe scripts/smoke.py"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^9.32.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "vue-eslint-parser": "^9.4.3"
+  },
+  "type": "module"
+}
