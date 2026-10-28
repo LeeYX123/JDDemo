@@ -22,29 +22,42 @@
 
 ### Windows
 
-双击 **`scripts/start.bat`**。首次运行会自动完成：
+双击 **`scripts/start.bat`** 即可，**不需要预先安装任何环境**。
 
-1. 环境自检（python / node / npm，缺失时给出安装提示并中止）
-2. 创建 `backend/.venv` 并安装 `requirements.txt`；`web/` 与 `admin/` 分别 `npm install`（已安装则跳过）
-3. 检查 `backend/.env`，不存在则从 `.env.example` 复制并提示填写后重新运行
-4. 按 `.env` 创建 MySQL 数据库（`DB_ENGINE=sqlite` 时自动跳过）
-5. `migrate` + `seed_demo`（已有数据则跳过造数）
-6. 开三个独立窗口启动 Django(8000) / 买家端(5173) / 后台端(5174)，日志写入 `scripts/logs/`
-7. 轮询等待三个端口就绪（最长 30 秒）后自动打开浏览器
+启动流程共 7 步，每一步都有中文进度输出：
 
-再次运行是幂等的：不会重复装依赖、不会重复造数，通常 10 秒内完成。
+1. **运行环境**：检测 Python ≥ 3.10、Node.js ≥ 18。缺失或版本过低时，自动下载便携版到 `.runtime/`（Node 便携包解压即用，Python 静默安装到项目目录，**都不需要管理员权限**），路径写入 `scripts/logs/env.cmd`
+2. **虚拟环境与依赖**：`backend/.venv` 缺失、损坏或 Python 版本过低时自动重建；`requirements.txt` 变化会重装；`web/`、`admin/` 的 `node_modules` 缺失或 lock 变化会重装（失败自动切国内镜像）
+3. **数据库**：`backend/.env` 不存在则从示例生成并提示；MySQL 模式自动建库；执行 `migrate` + `seed_demo` + `refresh_demo`
+4. **端口**：上一轮残留的 python/node 进程自动清理；被其他程序占用则明确报错并中止
+5. **启动服务**：Django(8000) / 买家端(5173) / 后台端(5174) 各自独立窗口，日志写入 `scripts/logs/`
+6. **等待就绪**：最多 60 秒
+7. **完成**：打印演示账号并打开浏览器
 
-停止服务：双击 **`scripts/stop.bat`**。
+依赖与数据都没有变化时，第二次启动约 10 秒完成。
 
-> 排查用：`scripts/start-debug.bat` 会在脚本结束后保留窗口并打印完整输出；
-> 无界面环境（CI / 远程）可用 `scripts\start.bat --no-browser` 跳过自动打开浏览器。
+常用参数：
+
+| 参数 | 作用 |
+| --- | --- |
+| `--repair` | 强制重建虚拟环境、重装 pip / npm 依赖 |
+| `--force-env` | 强制重新下载并安装便携 Python / Node |
+| `--no-browser` | 不自动打开浏览器（CI / 远程环境） |
+
+停止服务：双击 **`scripts/stop.bat`**。排查问题：**`scripts/start-debug.bat`**（结束后保留窗口）。
+
+> 自动下载的运行时都放在 `.runtime/`（已加入 `.gitignore`，可随时删除，下次启动会重建）。
+> 下载优先国内镜像，失败会自动直连重试；若公司网络需要代理，脚本会沿用系统代理设置。
 
 ### macOS / Linux
 
 ```bash
-bash scripts/start.sh     # 启动
-bash scripts/stop.sh      # 停止
+bash scripts/start.sh              # 启动（同样会按需下载 Node / Python）
+bash scripts/start.sh --repair     # 强制重建依赖
+bash scripts/stop.sh               # 停止
 ```
+
+缺少 Python 时会用 `uv` 安装便携版 CPython；缺少 Node 时下载官方 tar.gz 到 `.runtime/`。
 
 ### 使用 MySQL（可选）
 

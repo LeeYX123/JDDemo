@@ -3,26 +3,40 @@
 环境：Windows 11 + Python 3.13（venv）+ Node 22.22 + Chrome 155，`DB_ENGINE=sqlite`。
 下表为实际执行的检查与结果，命令与数据均可复现。
 
-## 1. 启动与幂等
+## 1. 启动与自举
+
+### 1.1 零环境自举（模拟“什么都没装”的电脑）
+
+测试方法：把 `PATH` 裁剪为只剩 `C:\Windows\System32;C:\Windows`（不含 Python / Node），再执行启动脚本。
+
+| 检查项 | 结果 | 实测证据 |
+| --- | --- | --- |
+| Node 自动下载解压 | **通过** | 下载 `node-v22.14.0-win-x64.zip` 并解压到 `.runtime\node-v22.14.0`，`node -v` = v22.14.0、`npm -v` = 10.9.2 |
+| Python 自动下载安装 | **通过** | 从华为云镜像下载 `python-3.12.8-amd64.exe`，静默安装到 `.runtime\python-3.12.8`，`python -V` = 3.12.8、pip 24.3.1 |
+| 无需管理员权限 | 通过 | 安装参数 `InstallAllUsers=0 TargetDir=<项目>\.runtime\...`，全程未提权 |
+| 环境变量落盘 | 通过 | 生成 `scripts/logs/env.cmd`，内容为 `SYS_PY`、`JD_NODE_DIR`、`PATH` 前置 |
+| 便携 Python 建虚拟环境 | **通过** | 用 `.runtime\python-3.12.8\python.exe` 创建独立 venv，成功安装 Django 5.2.18 等依赖 |
+| 下载失败兜底 | 通过 | 每个地址都尝试“代理 → 直连”，并用 curl + .NET 两套下载实现；实测代理失效时自动直连成功 |
+| 整体耗时 | 25 秒 | Node 复用缓存 + Python 下载安装（不含依赖安装） |
+
+### 1.2 已有环境（含版本过低 / 环境损坏）
 
 | 检查项 | 结果 | 说明 |
 | --- | --- | --- |
-| `start.bat` 全流程 | **通过（实跑）** | `cmd /d /c scripts\start.bat` 返回码 0，依次打印 7 个步骤与账号表，三个服务进入 LISTENING |
-| 环境自检 | 通过 | `start.bat` 用 `where` + `--version` 检查 python/node/npm，缺失时提示安装地址并 `exit /b 1` |
-| 依赖幂等 | 通过 | `backend/.venv/.deps_ok` 标记 + `web/admin/node_modules` 存在性判断，重复运行直接跳过 |
-| `.env` 缺失处理 | 通过 | 自动复制 `.env.example`，提示填写后 `exit /b 0`，不继续启动 |
-| 自动建库 | 通过 | `scripts/init_db.py` 读取 `.env`，mysql 模式执行 `CREATE DATABASE IF NOT EXISTS ... utf8mb4`；sqlite 直接跳过 |
-| 造数幂等 | 通过 | `seed_demo` 首行判断 `Spu.objects.exists()`，已有数据打印「跳过 seed_demo」 |
-| 端口占用提示 | 通过（实跑） | 实测占用 8000 时打印「端口 8000 已被占用（Django 后端 无法启动）」并中止 |
-| 三服务独立窗口 + 日志 | 通过（实跑） | `scripts/logs/{django,web,admin}.log` 均生成，Django 日志记录到首页与商品接口的 200 响应 |
-| 端口轮询 + 自动开浏览器 | 通过（实跑） | 轮询到三端口就绪后打开 `http://localhost:5173`，Django 日志中可见浏览器随后发起的 `/home/`、`/products/` 请求 |
-| 停止脚本 | 通过（实跑） | `stop.bat` 依次结束 8000/5173/5174 的进程，执行后三端口归零 |
+| 版本探测 | 通过 | 依次扫描 PATH、`Program Files\nodejs`、`%APPDATA%\nvm`、`%LOCALAPPDATA%\Programs\Python*` 等常见位置，取满足 3.10+ / 18+ 的最高版本 |
+| 版本过低 | 通过（逻辑验证） | 低版本会被记录为 `any`，随后改用 `.runtime` 便携版，不改动系统环境 |
+| 虚拟环境损坏 | 通过（代码路径） | 无法执行或版本过低时删除重建 |
+| 依赖增量 | **通过（实跑）** | `requirements.txt` 与 `package-lock.json` 的 md5 与标记比对，二次启动输出「依赖无变化，跳过」 |
+| 端口残留 | **通过（实跑）** | 上一轮残留的 `python.exe` / `node.exe` 被自动结束；非本项目进程则明确拒绝 |
+| 演示数据过期 | **通过（实跑）** | `refresh_demo` 把过期的秒杀场次顺延到当前窗口，冒烟恢复 32/32 |
+| 幂等 | **通过（实跑）** | 第二次启动全程跳过环境、依赖、造数，直接进入服务启动 |
 
-> 说明：`.bat` 已用 `cmd /d /c` 实跑（含 `--no-browser` 自测模式）。
-> 过程中发现并修复了一个致命问题：`echo   1) 用记事本打开 ...` 里的**半角右括号**在
-> `if not exist (...)` 块内被 cmd 当作代码块结束符，报「此时不应有 用记事本打开」并让脚本瞬间退出
-> （即用户看到的「闪退」）。现已把编号统一改为 `[1] [2] [3]`，并新增 `scripts/start-debug.bat`
-> 在异常时保留窗口。
+> 说明：`.bat` 全程用 `cmd /d /c` 实跑验证（含 `--no-browser` 自测模式）。
+> 过程中修复的问题：
+> 1. `echo 1) ...` 的半角右括号在 `if (...)` 块内被当成代码块结束符 → 脚本秒退（已改为 `[1]`）；
+> 2. 环境里同时存在 `http_proxy` 与 `HTTP_PROXY` 时，`Get-ChildItem Env:` 与 `Start-Process` 会报
+>    “字典中的关键字重复” → 增加兼容模式，下载改用进程内实现；
+> 3. `tasklist` CSV 取错列导致把 PID 当进程名 → 改为取第 1 列，并处理“PID 已退出”的残留端口。
 
 ## 2. 版式还原（浏览器实测，1440×900）
 

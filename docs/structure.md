@@ -59,14 +59,16 @@ JD_Demo/
 │     └─ styles/                   base/components/views
 │
 ├─ scripts/
-│  ├─ start.bat / start.sh         一键启动（幂等、自动开浏览器）
+│  ├─ start.bat / start.sh         一键启动（缺环境自动下载、依赖自动修复）
 │  ├─ start-debug.bat              排查用：结束后保留窗口
 │  ├─ stop.bat / stop.sh           按端口停止三个服务
 │  ├─ serve_django.bat             内部启动器（独立窗口 + 写日志）
 │  ├─ serve_web.bat / serve_admin.bat
+│  ├─ bootstrap.ps1                Windows 运行环境自举：探测/下载/安装 Python、Node
+│  ├─ tools/prepare.py             虚拟环境与依赖准备：健康检查、按哈希增量安装
 │  ├─ init_db.py                   按 .env 创建 MySQL 库（sqlite 跳过）
 │  ├─ smoke.py                     端到端冒烟（仅标准库）
-│  └─ logs/                        运行日志（运行后生成）
+│  └─ logs/                        运行日志（启动后生成，含 env.cmd）
 │
 ├─ docs/
 │  ├─ pages.md                     页面清单与交互要点
@@ -79,6 +81,7 @@ JD_Demo/
 │  └─ screenshots/                 实跑截图（首页 / 详情 / 双端看板 / 支付成功）
 │
 ├─ package.json                    根级 lint / format / build / smoke 脚本
+├─ .runtime/                       自动下载的便携 Python / Node（gitignore，可删）
 ├─ eslint.config.js                前端 ESLint（flat config + prettier 兼容）
 ├─ .prettierrc.json
 ├─ pyproject.toml                  ruff + black 配置
